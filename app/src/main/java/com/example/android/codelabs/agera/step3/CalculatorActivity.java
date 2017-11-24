@@ -30,6 +30,7 @@ import com.example.android.codelabs.agera.UiUtils;
 import com.google.android.agera.MutableRepository;
 import com.google.android.agera.Repositories;
 import com.google.android.agera.Repository;
+import com.google.android.agera.RepositoryConfig;
 import com.google.android.agera.Result;
 import com.google.android.agera.Updatable;
 import java.util.concurrent.ExecutorService;
@@ -71,6 +72,9 @@ public class CalculatorActivity extends AppCompatActivity {
     mResultRepository = Repositories.repositoryWithInitialValue(Result.<String>absent())
         .observe(mValue1Repo, mValue2Repo, mOperationSelector)
         .onUpdatesPerLoop()
+        .goTo(mExecutor)
+        .attemptTransform(CalculatorOperations::keepCpuBusy)
+        .orEnd(Result::failure)
         .getFrom(mValue1Repo)
         .mergeIn(mValue2Repo, Pair::create)
         .attemptMergeIn(mOperationSelector, CalculatorOperations::attemptOperation)
